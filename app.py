@@ -56,10 +56,10 @@ if img_file and u_name and u_email:
         st.write("---")
         st.write("### 🧪 Chemical-Matched Recommendations")
         
-        # 1. Column names ki safai (taaki search asan ho)
+       
         df.columns = [c.strip().lower() for c in df.columns]
         
-        # 2. Sahi column dhundna (Label ya Skin Type)
+        
         search_col = None
         for col in ['label', 'skin type', 'category', 'type']:
             if col in df.columns:
@@ -67,7 +67,7 @@ if img_file and u_name and u_email:
                 break
         
         if search_col:
-            # 3. Filtering Logic
+           
             keyword = detected_type.split('/')[0] # 'Oily' ya 'Normal'
             recs = df[df[search_col].str.contains(keyword, case=False, na=False)].head(6)
             
@@ -86,3 +86,4 @@ if img_file and u_name and u_email:
                 st.warning("Aapke skin type ke liye exact match nahi mila. Default routine check karein.")
         else:
             st.error("Dataset mein 'Label' ya 'Skin Type' ka column nahi mila. Please check your CSV!")
+
