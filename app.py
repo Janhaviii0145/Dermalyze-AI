@@ -51,18 +51,38 @@ if img_file and u_name and u_email:
     st.subheader(f"Analysis Report for {u_name}")
     st.info(f"Detected Skin Category: **{detected_type}**")
     
+   # RECOMMENDATION ENGINE (Updated for Huge Datasets)
     if df is not None:
+        st.write("---")
         st.write("### 🧪 Chemical-Matched Recommendations")
-        # Searching the huge dataset
-        # Hume 'skin_type' ya 'label' column check karna hoga dataset ke hisab se
-        search_col = 'label' if 'label' in df.columns else df.columns[0]
-        recs = df[df[search_col].str.contains(detected_type.split('/')[0], case=False, na=False)].head(6)
         
-        # Displaying in a Grid
-        cols = st.columns(3)
-        for i, (idx, row) in enumerate(recs.iterrows()):
-            with cols[i % 3]:
-                st.markdown(f"**{row.get('name', 'Product')}**")
-                st.caption(f"Brand: {row.get('brand', 'Premium')}")
-                st.write(f"Price: {row.get('price', 'N/A')}")
-                st.button("Buy Now", key=idx)
+        # 1. Column names ki safai (taaki search asan ho)
+        df.columns = [c.strip().lower() for c in df.columns]
+        
+        # 2. Sahi column dhundna (Label ya Skin Type)
+        search_col = None
+        for col in ['label', 'skin type', 'category', 'type']:
+            if col in df.columns:
+                search_col = col
+                break
+        
+        if search_col:
+            # 3. Filtering Logic
+            keyword = detected_type.split('/')[0] # 'Oily' ya 'Normal'
+            recs = df[df[search_col].str.contains(keyword, case=False, na=False)].head(6)
+            
+            if not recs.empty:
+                cols = st.columns(3)
+                for i, (idx, row) in enumerate(recs.iterrows()):
+                    with cols[i % 3]:
+                        # Name aur Brand ke columns dynamic check karna
+                        p_name = row.get('name', row.get('product_name', 'Skincare Product'))
+                        p_brand = row.get('brand', row.get('product_brand', 'Premium Brand'))
+                        
+                        st.success(f"**{p_name}**")
+                        st.caption(f"Brand: {p_brand}")
+                        st.markdown(f"[🔍 Google Search](https://www.google.com/search?q={p_name.replace(' ', '+')})")
+            else:
+                st.warning("Aapke skin type ke liye exact match nahi mila. Default routine check karein.")
+        else:
+            st.error("Dataset mein 'Label' ya 'Skin Type' ka column nahi mila. Please check your CSV!")
